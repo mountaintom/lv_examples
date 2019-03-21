@@ -87,7 +87,7 @@ void lv_test_tileview_1(void)
     lv_obj_t * list12 = lv_list_create(t, NULL);
     lv_obj_set_size(list12, hres, vres);
     lv_obj_align(list12, p11, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-    lv_list_set_scroll_propagation(list12, true);
+    lv_list_set_scroll_propagation(list12, true, true);
     lv_tileview_add_element(t, list12);
 
     lv_obj_t * list_btn;
