@@ -7,7 +7,7 @@
  *      INCLUDES
  *********************/
 #include "sysmon.h"
-#if USE_LV_SYSMON
+#if LV_USE_SYSMON
 
 #include <stdio.h>
 
@@ -27,8 +27,8 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void sysmon_task(void * param);
-static lv_res_t win_close_action(lv_obj_t * btn);
+static void sysmon_task(lv_task_t * param);
+static void win_close_action(lv_obj_t * btn, lv_event_t event);
 
 /**********************
  *  STATIC VARIABLES
@@ -55,15 +55,20 @@ void sysmon_create(void)
 {
     refr_task = lv_task_create(sysmon_task, REFR_TIME, LV_TASK_PRIO_LOW, NULL);
 
-    win = lv_win_create(lv_scr_act(), NULL);
-    lv_win_add_btn(win, SYMBOL_CLOSE, win_close_action);
+
+    lv_coord_t hres = lv_disp_get_hor_res(NULL);
+    lv_coord_t vres = lv_disp_get_ver_res(NULL);
+
+    win = lv_win_create(lv_disp_get_scr_act(NULL), NULL);
+    lv_obj_t * win_btn = lv_win_add_btn(win, LV_SYMBOL_CLOSE);
+    lv_obj_set_event_cb(win_btn, win_close_action);
 
     /*Make the window content responsive*/
     lv_win_set_layout(win, LV_LAYOUT_PRETTY);
 
     /*Create a chart with two data lines*/
     chart = lv_chart_create(win, NULL);
-    lv_obj_set_size(chart, LV_HOR_RES / 2, LV_VER_RES / 2);
+    lv_obj_set_size(chart, hres / 2, vres / 2);
     lv_obj_set_pos(chart, LV_DPI / 10, LV_DPI / 10);
     lv_chart_set_point_count(chart, CHART_POINT_NUM);
     lv_chart_set_range(chart, 0, 100);
@@ -92,11 +97,12 @@ void sysmon_create(void)
  *   STATIC FUNCTIONS
  **********************/
 
+#define SYSMON_STRING_BUFFER_SIZE 256
 /**
  * Called periodically to monitor the CPU and memory usage.
  * @param param unused
  */
-static void sysmon_task(void * param)
+static void sysmon_task(lv_task_t * param)
 {
 
     (void) param;    /*Unused*/
@@ -119,28 +125,27 @@ static void sysmon_task(void * param)
     lv_chart_set_next(chart, mem_ser, mem_used_pct);
 
     /*Refresh the and windows*/
-    char buf_long[256];
-    sprintf(buf_long, "%s%s CPU: %d %%%s\n\n",
+    char buf_long[SYSMON_STRING_BUFFER_SIZE];
+    int len = 0;
+    len += lv_snprintf(buf_long+len, SYSMON_STRING_BUFFER_SIZE-len, "%s%s CPU: %d %%%s\n\n",
             LV_TXT_COLOR_CMD,
             CPU_LABEL_COLOR,
             cpu_busy,
             LV_TXT_COLOR_CMD);
 
 #if LV_MEM_CUSTOM == 0
-    sprintf(buf_long, "%s"LV_TXT_COLOR_CMD"%s MEMORY: %d %%"LV_TXT_COLOR_CMD"\n"
+    len += lv_snprintf(buf_long+len, SYSMON_STRING_BUFFER_SIZE-len, LV_TXT_COLOR_CMD"%s MEMORY: %d %%"LV_TXT_COLOR_CMD"\n"
             "Total: %d bytes\n"
             "Used: %d bytes\n"
             "Free: %d bytes\n"
             "Frag: %d %%",
-            buf_long,
             MEM_LABEL_COLOR,
             mem_used_pct,
             (int)mem_mon.total_size,
             (int)mem_mon.total_size - mem_mon.free_size, mem_mon.free_size, mem_mon.frag_pct);
 
 #else
-    sprintf(buf_long, "%s"LV_TXT_COLOR_CMD"%s MEMORY: N/A"LV_TXT_COLOR_CMD,
-            buf_long,
+    len += lv_snprintf(buf_long+len, SYSMON_STRING_BUFFER_SIZE-len, LV_TXT_COLOR_CMD"%s MEMORY: N/A"LV_TXT_COLOR_CMD,
             MEM_LABEL_COLOR);
 #endif
     lv_label_set_text(info_label, buf_long);
@@ -152,18 +157,19 @@ static void sysmon_task(void * param)
 /**
  * Called when the window's close button is clicked
  * @param btn pointer to the close button
- * @return LV_ACTION_RES_INV because the button is deleted in the function
+ * @param event the current event
  */
-static lv_res_t win_close_action(lv_obj_t * btn)
+static void win_close_action(lv_obj_t * btn, lv_event_t event)
 {
     (void) btn;    /*Unused*/
+
+    if(event != LV_EVENT_CLICKED) return;
 
     lv_obj_del(win);
     win = NULL;
 
     lv_task_del(refr_task);
     refr_task = NULL;
-    return LV_RES_INV;
 }
 
-#endif /*USE_LV_SYMON*/
+#endif /*LV_USE_SYMON*/

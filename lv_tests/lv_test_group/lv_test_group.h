@@ -21,7 +21,7 @@ extern "C" {
 #include "../../../lv_ex_conf.h"
 #endif
 
-#if USE_LV_GROUP && USE_LV_TESTS
+#if LV_USE_GROUP && LV_USE_TESTS
 
 /*********************
  *      DEFINES
@@ -38,13 +38,13 @@ extern "C" {
 /**
  * Create base groups to test their functionalities
  */
-void lv_test_group_1(void);
+lv_group_t *lv_test_group_1(void);
 
 /**********************
  *      MACROS
  **********************/
 
-#endif /* USE_LV_GROUP && USE_LV_TESTS */
+#endif /* LV_USE_GROUP && LV_USE_TESTS */
 
 #ifdef __cplusplus
 } /* extern "C" */

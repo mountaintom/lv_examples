@@ -1,10 +1,10 @@
 /**
- * @file lv_ex_porting.h
+ * @file lv_test_cpicker.h
  *
  */
 
-#ifndef LV_TUTORIAL_PORTING_H
-#define LV_TUTORIAL_PORTING_H
+#ifndef LV_TEST_CPICKER_H
+#define LV_TEST_CPICKER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,11 +17,11 @@ extern "C" {
 #include "lvgl.h"
 #include "lv_ex_conf.h"
 #else
-#include "../../../lvgl/lvgl.h"
-#include "../../../lv_ex_conf.h"
+#include "../../../../lvgl/lvgl.h"
+#include "../../../../lv_ex_conf.h"
 #endif
 
-#if USE_LV_TUTORIALS
+#if LV_USE_CPICKER && LV_USE_TESTS
 
 /*********************
  *      DEFINES
@@ -34,16 +34,21 @@ extern "C" {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-void lv_tutorial_porting(void);
+
+/**
+ * Create a color picker to test its basic functionalities
+ */
+void lv_test_cpicker_1(void);
+
 
 /**********************
  *      MACROS
  **********************/
 
-#endif /*USE_LV_TUTORIALS*/
+#endif /*LV_USE_CONT && LV_USE_TESTS*/
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /*LV_TUTORIAL_PORTING_H*/
+#endif /*LV_TEST_CONT_H*/
